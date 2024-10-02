@@ -1,0 +1,1 @@
+sudo mount --bind  ../billing-cms/src/server/models ./models
