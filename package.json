@@ -2,7 +2,7 @@
   "name": "billing-cms-sdk",
   "module": "index.ts",
   "type": "module",
-  "veersion": "0.0.2",
+  "veersion": "0.0.21",
   "devDependencies": {
     "@types/bun": "latest"
   },
