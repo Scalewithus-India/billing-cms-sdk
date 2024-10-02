@@ -1,18 +1,16 @@
-
 import type { NextFunction, Request, Response } from "express"
 
 export interface PaymentGatewayConfig {
     name: string
-    identifire: string
+    identifier: string
     type: "text" | "number" | "password" | "checkbox" | "radio" | "select" | "textarea"
-    descripion?: string
-
+    validator?: "string" | ((value: string | number | boolean) => boolean)
+    description?: string
 }
-
 
 export interface PaymentGateway {
     name: string
-    identifire: string
+    identifier: string
     icon: string
     isAviable(): Promise<boolean>
     config(): Promise<PaymentGatewayConfig[]>
