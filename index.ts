@@ -2,7 +2,6 @@ import type { NextFunction, Request, Response } from "express"
 
 export interface PaymentGatewayConfig {
     name: string
-    identifier: string
     type: "text" | "number" | "password" | "checkbox" | "radio" | "select" | "textarea"
     validator?: "string" | ((value: string | number | boolean) => boolean)
     description?: string
