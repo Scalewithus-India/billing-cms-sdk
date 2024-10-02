@@ -2,6 +2,7 @@ import type { NextFunction, Request, Response } from "express"
 
 export interface PaymentGatewayConfig {
     name: string
+    identifier: string
     type: "text" | "number" | "password" | "checkbox" | "radio" | "select" | "textarea"
     validator?: "string" | ((value: string | number | boolean) => boolean)
     description?: string
@@ -9,7 +10,6 @@ export interface PaymentGatewayConfig {
 
 export interface PaymentGateway {
     name: string
-    identifier: string
     icon: string
     isAviable(): Promise<boolean>
     config(): Promise<PaymentGatewayConfig[]>
