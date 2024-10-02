@@ -1,5 +1,6 @@
 import type { NextFunction, Request, Response } from "express"
-import type { DocumentType, ReturnModelType } from "@typegoose/typegoose"
+import InvoiceModel from "./models/invoice.model"
+import UserModel from "./models/user.model"
 
 export interface PaymentGatewayConfig {
     name: string
@@ -10,17 +11,18 @@ export interface PaymentGatewayConfig {
 }
 
 export interface Models {
-    [key: string]: ReturnModelType<any>
+    invoices: typeof InvoiceModel,
+    users: typeof UserModel,
 }
 
 export interface Lib {
     models: Models
 }
 
-export interface PaymentGateway {
+export declare class PaymentGateway {
     name: string
     icon: string
-    constructor(lib: Lib): void;
+    constructor(lib: Lib);
     isAviable(): Promise<boolean>
     config(): Promise<PaymentGatewayConfig[]>
     callback?(req: Request, res: Response, next?: NextFunction): Promise<void>
