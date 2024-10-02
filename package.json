@@ -10,7 +10,9 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
+    "@typegoose/typegoose": "^12.8.0",
     "@types/express": "^5.0.0",
-    "express": "^4.21.0"
+    "express": "^4.21.0",
+    "typegoose": "^5.9.1"
   }
 }
