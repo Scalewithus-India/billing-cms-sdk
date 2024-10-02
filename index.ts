@@ -9,18 +9,18 @@ export interface PaymentGatewayConfig {
     description?: string
 }
 
-interface Models {
+export interface Models {
     [key: string]: ReturnModelType<any>
 }
 
-interface Lib {
+export interface Lib {
     models: Models
 }
 
 export interface PaymentGateway {
     name: string
     icon: string
-    constructor?(lib: Lib): void;
+    constructor(lib: Lib): void;
     isAviable(): Promise<boolean>
     config(): Promise<PaymentGatewayConfig[]>
     callback?(req: Request, res: Response, next?: NextFunction): Promise<void>
