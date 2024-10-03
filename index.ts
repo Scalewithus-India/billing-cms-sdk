@@ -41,9 +41,9 @@ export declare abstract class PaymentGateway {
     name: string
     icon: string
     constructor(lib: Lib);
-    abstract isAvailable(): Promise<boolean> 
-    abstract config(): Promise<PaymentGatewayConfig[]>
-    callback?(req: Request, res: Response, next?: NextFunction): Promise<void>
-    webhook?(req: Request, res: Response, next?: NextFunction): Promise<void>
-    abstract initiate(invoiceID: string): Promise<string>
+    abstract isAvailable(): Promise<boolean> | boolean
+    abstract config(): Promise<PaymentGatewayConfig[]> | PaymentGatewayConfig[]
+    callback?(req: Request, res: Response, next?: NextFunction): Promise<void> | void
+    webhook?(req: Request, res: Response, next?: NextFunction): Promise<void> | void
+    abstract initiate(invoiceID: string): Promise<string> | string
 }
