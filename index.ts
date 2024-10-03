@@ -33,6 +33,7 @@ export interface Models {
     countries: typeof CountryModel,
 }
 
+
 export interface Lib {
     models: Models
 }

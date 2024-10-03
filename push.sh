@@ -13,17 +13,25 @@ sed -i "s/\"version\": \"$current_version\"/\"version\": \"$new_version\"/" pack
 
 echo "Version updated to $new_version"
 
+# Stage all changes
+git add .
+
 # Check if a commit message is provided
 if [ $# -eq 0 ]; then
     # No commit message provided, generate one with updated files
-    commit_message="Update version to $new_version. Updated files:\n\n$(git diff --cached --name-only | sed 's/^/- /')"
+    commit_message=$(cat << EOF
+Update version to $new_version
+
+Updated files:
+$(git diff --staged --name-only | sed 's/^/- /')
+EOF
+)
 else
     # Use the provided commit message
     commit_message="$1"
 fi
 
 # Commit and push changes
-git add .
 git commit -m "$commit_message"
 git push
 
