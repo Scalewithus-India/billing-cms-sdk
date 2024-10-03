@@ -1,6 +1,7 @@
 import type { NextFunction, Request, Response } from "express"
 import InvoiceModel from "./models/invoice.model"
 import UserModel from "./models/user.model"
+import { TicketModel } from "./models/tickets.model"
 
 export interface PaymentGatewayConfig {
     name: string
@@ -13,6 +14,7 @@ export interface PaymentGatewayConfig {
 export interface Models {
     invoices: typeof InvoiceModel,
     users: typeof UserModel,
+    tickets: typeof TicketModel
 }
 
 export interface Lib {
