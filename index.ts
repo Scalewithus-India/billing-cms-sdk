@@ -5,7 +5,7 @@ import { TicketModel } from "./models/tickets.model"
 import CurrencyModel from "./models/currency.model"
 import OptionModel from "./models/option.model"
 import ProductModel from "./models/product.model"
-import { EmailTemplateModel } from "./models/email-template.nodel"
+import { EmailTemplateModel } from "./models/email-template.model" // Fixed typo in file name
 import ProductGroupModel from "./models/product-group.model"
 import { APIKeyModel } from "./models/api-keys.model"
 import AuthenticationMethodModel from "./models/authentication-method.model"
@@ -33,18 +33,17 @@ export interface Models {
     countries: typeof CountryModel,
 }
 
-
 export interface Lib {
     models: Models
 }
 
-export declare class PaymentGateway {
+export declare abstract class PaymentGateway { 
     name: string
     icon: string
     constructor(lib: Lib);
-    isAviable(): Promise<boolean>
-    config(): Promise<PaymentGatewayConfig[]>
+    abstract isAvailable(): Promise<boolean> 
+    abstract config(): Promise<PaymentGatewayConfig[]>
     callback?(req: Request, res: Response, next?: NextFunction): Promise<void>
     webhook?(req: Request, res: Response, next?: NextFunction): Promise<void>
-    initiate(invoiceID: string): Promise<string>
+    abstract initiate(invoiceID: string): Promise<string>
 }
