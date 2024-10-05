@@ -1,4 +1,4 @@
-import { getModelForClass, index, pre, prop, Ref } from '@typegoose/typegoose';
+import { getModelForClass, index, pre, prop, type Ref } from '@typegoose/typegoose';
 import { Types } from 'mongoose';
 import { User } from './user.model';
 
