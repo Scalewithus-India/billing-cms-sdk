@@ -1,15 +1,15 @@
 import type { NextFunction, Request, Response } from "express"
-import type InvoiceModel from "./models/invoice.model"
-import type UserModel from "./models/user.model"
-import type { TicketModel } from "./models/tickets.model"
-import type CurrencyModel from "./models/currency.model"
-import type OptionModel from "./models/option.model"
-import type ProductModel from "./models/product.model"
-import type { EmailTemplateModel } from "./models/email-template.model" // Fixed typo in file name
-import type ProductGroupModel from "./models/product-group.model"
-import type { APIKeyModel } from "./models/api-keys.model"
-import type AuthenticationMethodModel from "./models/authentication-method.model"
-import type CountryModel from "./models/country-state.model"
+// import type InvoiceModel from "./models/invoice.model"
+// import type UserModel from "./models/user.model"
+// import type { TicketModel } from "./models/tickets.model"
+// import type CurrencyModel from "./models/currency.model"
+// import type OptionModel from "./models/option.model"
+// import type ProductModel from "./models/product.model"
+// import type { EmailTemplateModel } from "./models/email-template.model" // Fixed typo in file name
+// import type ProductGroupModel from "./models/product-group.model"
+// import type { APIKeyModel } from "./models/api-keys.model"
+// import type AuthenticationMethodModel from "./models/authentication-method.model"
+// import type CountryModel from "./models/country-state.model"
 
 export interface PaymentGatewayConfig {
     name: string
@@ -20,17 +20,17 @@ export interface PaymentGatewayConfig {
 }
 
 export interface Models {
-    invoices: typeof InvoiceModel,
-    users: typeof UserModel,
-    tickets: typeof TicketModel,
-    currencies: typeof CurrencyModel,
-    options: typeof OptionModel,
-    products: typeof ProductModel,
-    productGroups: typeof ProductGroupModel,
-    emailTemplates: typeof EmailTemplateModel,
-    apiKeys: typeof APIKeyModel,
-    authenticationMethods: typeof AuthenticationMethodModel,
-    countries: typeof CountryModel,
+    invoices: any,
+    users: any,
+    tickets: any,
+    currencies: any,
+    options: any,
+    products: any,
+    productGroups: any,
+    emailTemplates: any,
+    apiKeys: any,
+    authenticationMethods: any,
+    countries: any,
 }
 
 export interface Lib {
