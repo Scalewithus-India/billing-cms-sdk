@@ -1,5 +1,6 @@
 import { getModelForClass, prop } from "@typegoose/typegoose";
 import { User } from "./user.model";
+import mongoose from 'mongoose';
 
 
 export enum InvoiceStatus {
@@ -82,7 +83,7 @@ class Invoice {
     items!: InvoiceItem[]
 }
 
-const InvoiceModel = getModelForClass(Invoice, {
+const InvoiceModel = mongoose.models.Invoice ||getModelForClass(Invoice, {
     schemaOptions: { timestamps: true },
 });
 

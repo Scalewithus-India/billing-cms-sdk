@@ -2,6 +2,7 @@ import { getModelForClass, prop } from '@typegoose/typegoose';
 import type { Ref } from '@typegoose/typegoose';
 import { User } from './user.model';
 import type { NamedAlgo } from '@passwordless-id/webauthn/dist/esm/types';
+import mongoose from 'mongoose';
 
 export class Authenticator {
     @prop({ required: true })
@@ -89,8 +90,7 @@ export class AuthenticationMethod {
     @prop({ type: Date })
     public lastUsed?: Date;
 }
-
-const AuthenticationMethodModel = getModelForClass(AuthenticationMethod, {
+const AuthenticationMethodModel = mongoose.models.AuthenticationMethod || getModelForClass(AuthenticationMethod, {
     schemaOptions: { timestamps: true },
 });
 

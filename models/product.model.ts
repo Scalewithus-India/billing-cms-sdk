@@ -3,6 +3,7 @@ import type { Ref } from '@typegoose/typegoose';
 import slugify from 'slugify';
 import { User } from './user.model';
 import { ProductGroup } from './product-group.model';
+import mongoose from 'mongoose';
 
 class ProductPrice {
   @prop({ required: true })
@@ -134,7 +135,7 @@ export class Product {
 
 }
 
-const ProductModel = getModelForClass(Product, {
+const ProductModel = mongoose.models.Product || getModelForClass(Product, {
   schemaOptions: { timestamps: true },
 });
 

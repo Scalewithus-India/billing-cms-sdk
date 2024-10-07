@@ -1,5 +1,6 @@
 import { prop, getModelForClass, pre } from '@typegoose/typegoose';
 import { Types } from 'mongoose';
+import mongoose from 'mongoose';
 
 // @pre<Currency>('save', async function () {
 //     if (this.isDefault) {
@@ -41,6 +42,6 @@ export class Currency {
     thousandSeparator!: string;
 }
 
-const CurrencyModel = getModelForClass(Currency);
+const CurrencyModel = mongoose.models.Currency ||  getModelForClass(Currency);
 
 export default CurrencyModel;

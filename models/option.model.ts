@@ -1,4 +1,5 @@
 import { getModelForClass, prop } from '@typegoose/typegoose';
+import mongoose from 'mongoose';
 
 export class Option {
     @prop({ required: true })
@@ -11,7 +12,7 @@ export class Option {
     public cachable!: boolean;
 }
 
-const OptionModel = getModelForClass(Option, {
+const OptionModel = mongoose.models.Option || getModelForClass(Option, {
     schemaOptions: { timestamps: true },
 });
 

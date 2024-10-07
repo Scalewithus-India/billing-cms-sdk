@@ -1,6 +1,7 @@
 import { getModelForClass, index, pre, prop, type Ref } from '@typegoose/typegoose';
 import { Types } from 'mongoose';
 import { User } from './user.model';
+import mongoose from 'mongoose';
 
 export class TicketReply {
     @prop({ required: true })
@@ -57,7 +58,7 @@ export class Ticket {
 //     schemaOptions: { timestamps: true },
 // });
 
-const TicketModel = getModelForClass(Ticket, {
+const TicketModel = mongoose.models.Ticket || getModelForClass(Ticket, {
     schemaOptions: { timestamps: true },
 });
 

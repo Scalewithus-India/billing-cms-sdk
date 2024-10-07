@@ -1,6 +1,7 @@
 import { getModelForClass, index, pre, prop, DocumentType } from '@typegoose/typegoose';
 import { Types } from 'mongoose';
 import CurrencyModel from './currency.model';
+import mongoose from 'mongoose';
 
 
 
@@ -134,7 +135,7 @@ export class User {
 
 
 
-const UserModel = getModelForClass(User, {
+const UserModel = mongoose.models.User || getModelForClass(User, {
   schemaOptions: { timestamps: true },
 });
 // Define the UserType

@@ -1,4 +1,5 @@
 import { getModelForClass, prop } from "@typegoose/typegoose";
+import mongoose from 'mongoose';
 
 
 export enum EmailTemplates {
@@ -28,7 +29,7 @@ export class EmailTemplate {
     css!: string;
 }
 
-export const EmailTemplateModel = getModelForClass(EmailTemplate, {
+export const EmailTemplateModel = mongoose.models.EmailTemplate || getModelForClass(EmailTemplate, {
     schemaOptions: {
         timestamps: true
     }

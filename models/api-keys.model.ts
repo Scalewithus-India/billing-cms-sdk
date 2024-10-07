@@ -1,6 +1,7 @@
 import { getModelForClass, prop } from "@typegoose/typegoose";
 import { Types } from "mongoose";
 import { User } from "./user.model"; // Assuming you have a User model
+import mongoose from 'mongoose';
 
 
 export enum ApiRouteMethod {
@@ -66,6 +67,6 @@ export class APIKey {
     routePermissions!: [ApiRoutePermission];
 };
 
-export const APIKeyModel = getModelForClass(APIKey, {
+export const APIKeyModel = mongoose.models.APIKey || getModelForClass(APIKey, {
     schemaOptions: { timestamps: true },
 });

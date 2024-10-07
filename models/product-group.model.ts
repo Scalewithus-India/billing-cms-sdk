@@ -1,6 +1,7 @@
 import { getModelForClass, prop, } from '@typegoose/typegoose';
 import type { Ref } from '@typegoose/typegoose';
 import { User } from './user.model';
+import mongoose from 'mongoose';
 
 // @pre<ProductGroup>('save', function (next) {
 //   if (!this.isModified('name')) return next();
@@ -48,7 +49,7 @@ export class ProductGroup {
   public lastEditedBy!: Ref<User>;
 }
 
-const ProductGroupModel = getModelForClass(ProductGroup, {
+const ProductGroupModel = mongoose.models.ProductGroup || getModelForClass(ProductGroup, {
   schemaOptions: { timestamps: true },
 });
 

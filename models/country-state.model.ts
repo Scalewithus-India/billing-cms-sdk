@@ -1,4 +1,5 @@
 import { getModelForClass, prop } from '@typegoose/typegoose';
+import mongoose from 'mongoose';
 
 export class Timezone {
   @prop()
@@ -137,7 +138,7 @@ export class Country {
   public states?: State[];
 }
 
-const CountryModel = getModelForClass(Country, {
+const CountryModel = mongoose.models.Country || getModelForClass(Country, {
   schemaOptions: { timestamps: true },
 });
 
