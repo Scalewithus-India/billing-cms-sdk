@@ -15,7 +15,7 @@ export interface PaymentGatewayConfig {
     name: string
     identifier: string
     type: "text" | "number" | "password" | "checkbox" | "radio" | "select" | "textarea"
-    validator?: "string" | ((value: string | number | boolean) => boolean)
+    validator?: string | ((value: string | number | boolean) => boolean)
     description?: string
 }
 
@@ -33,14 +33,20 @@ export interface Models {
     countries: any,
 }
 
-export interface Lib {
+export declare abstract class PluginLib {
+    abstract getOption(identifier: string): Promise<string | boolean | null | number>
+    abstract setOption(identifier: string, value: string | boolean | number | null, ops: any): Promise<string | boolean | null | number>
+}
+
+export interface Context {
     models: Models
+    lib: PluginLib
 }
 
 export declare abstract class PaymentGateway {
     name: string
     icon: string
-    constructor(lib: Lib);
+    constructor(lib: Context);
     abstract isAvailable(): Promise<boolean> | boolean
     abstract config(): Promise<PaymentGatewayConfig[]> | PaymentGatewayConfig[]
     callback?(req: Request, res: Response, next?: NextFunction): Promise<void> | void
