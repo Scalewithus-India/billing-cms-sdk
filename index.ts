@@ -36,6 +36,7 @@ export interface Models {
 export declare abstract class PluginLib {
     abstract getOption(identifier: string): Promise<string | boolean | null | number>
     abstract setOption(identifier: string, value: string | boolean | number | null, ops: any): Promise<string | boolean | null | number>
+    invoiceService: any
 }
 
 export interface Context {
