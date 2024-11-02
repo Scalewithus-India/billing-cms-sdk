@@ -52,5 +52,5 @@ export declare abstract class PaymentGateway {
     abstract config(): Promise<PaymentGatewayConfig[]> | PaymentGatewayConfig[]
     callback?(req: Request, res: Response, next?: NextFunction): Promise<void> | void
     webhook?(req: Request, res: Response, next?: NextFunction): Promise<void> | void
-    abstract initiate(invoiceID: string): Promise<string> | string
+    abstract initiate(invoiceID: string, amount: number): Promise<string> | string
 }
