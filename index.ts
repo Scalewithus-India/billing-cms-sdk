@@ -1,4 +1,7 @@
-import type { NextFunction, Request, Response } from "express"
+// Express types - made optional to avoid dependency issues
+type Request = any;
+type Response = any;
+type NextFunction = any;
 // import type InvoiceModel from "./models/invoice.model"
 // import type UserModel from "./models/user.model"
 // import type { TicketModel } from "./models/tickets.model"
@@ -17,6 +20,17 @@ export interface PaymentGatewayConfig {
     type: "text" | "number" | "password" | "checkbox" | "radio" | "select" | "textarea"
     validator?: string | ((value: string | number | boolean) => boolean)
     description?: string
+    default?: string | number | boolean
+}
+
+export interface BackendProviderConfig {
+    type: string
+    identifier: string
+    name: string
+    description: string
+    defaultValue?: any
+    required?: boolean
+    validation?: string
 }
 
 export interface Models {
@@ -31,6 +45,14 @@ export interface Models {
     apiKeys: any,
     authenticationMethods: any,
     countries: any,
+    backends: any,
+    backendGroups: any,
+    logs: any,
+    transactions: any,
+    userServices: any,
+    wallets: any,
+    walletTransactions: any,
+    navigation: any,
 }
 
 export declare abstract class PluginLib {
@@ -53,4 +75,17 @@ export declare abstract class PaymentGateway {
     callback?(req: Request, res: Response, next?: NextFunction): Promise<void> | void
     webhook?(req: Request, res: Response, next?: NextFunction): Promise<void> | void
     abstract initiate(invoiceID: string, amount: number): Promise<string> | string
+}
+
+export declare abstract class BackendProvider {
+    name: string
+    icon?: string
+    constructor(lib: Context);
+    abstract config(): BackendProviderConfig[] | Promise<BackendProviderConfig[]>
+    testConnection?(config: Record<string, any>): Promise<{ success: boolean; message: string; details?: any }>
+    createAccount?(config: Record<string, any>, backendId: string, serviceData: any): Promise<any>
+    suspendAccount?(config: Record<string, any>, backendId: string, accountId: string): Promise<any>
+    unsuspendAccount?(config: Record<string, any>, backendId: string, accountId: string): Promise<any>
+    terminateAccount?(config: Record<string, any>, backendId: string, accountId: string): Promise<any>
+    getAccountInfo?(config: Record<string, any>, backendId: string, accountId: string): Promise<any>
 }
