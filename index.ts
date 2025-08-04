@@ -88,4 +88,6 @@ export declare abstract class BackendProvider {
     unsuspendAccount?(config: Record<string, any>, backendId: string, accountId: string): Promise<any>
     terminateAccount?(config: Record<string, any>, backendId: string, accountId: string): Promise<any>
     getAccountInfo?(config: Record<string, any>, backendId: string, accountId: string): Promise<any>
+    customFields?(config: Record<string, any>, backendGroupId?: string): Promise<any[]> | any[]
+    validateUserInput?(config: Record<string, any>, userInputs: Record<string, any>): Promise<{ isValid: boolean; errors?: Record<string, string> }> | { isValid: boolean; errors?: Record<string, string> }
 }
