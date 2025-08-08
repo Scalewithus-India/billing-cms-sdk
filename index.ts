@@ -92,4 +92,5 @@ export declare abstract class BackendProvider {
     validateUserInput?(config: Record<string, any>, userInputs: Record<string, any>): Promise<{ isValid: boolean; errors?: Record<string, string> }> | { isValid: boolean; errors?: Record<string, string> }
     productConfig?(config: Record<string, any>): Promise<BackendProviderConfig[]> | BackendProviderConfig[]
     serverSingleSignOn?(config: Record<string, any>): Promise<{ success: boolean; url?: string; message?: string }> | { success: boolean; url?: string; message?: string }
+    clientSingleSignOn?(config: Record<string, any>, backendConfig: Record<string, any>, userService: any, product: any): Promise<{ success: boolean; url?: string; message?: string }> | { success: boolean; url?: string; message?: string }
 }
