@@ -94,3 +94,117 @@ export declare abstract class BackendProvider {
     serverSingleSignOn?(config: Record<string, any>): Promise<{ success: boolean; url?: string; message?: string }> | { success: boolean; url?: string; message?: string }
     clientSingleSignOn?(config: Record<string, any>, backendConfig: Record<string, any>, userService: any, product: any): Promise<{ success: boolean; url?: string; message?: string }> | { success: boolean; url?: string; message?: string }
 }
+
+// Domain Registrar Provider Types
+export interface DomainRegistrarProviderConfig {
+    type: 'text' | 'password' | 'number' | 'boolean' | 'select' | 'textarea';
+    identifier: string;
+    name: string;
+    description?: string;
+    defaultValue?: any;
+    required?: boolean;
+    options?: Array<{ label: string; value: any }>;
+}
+
+export interface DomainAvailabilityResult {
+    domain: string;
+    available: boolean;
+    premium?: boolean;
+    price?: number;
+    currency?: string;
+    message?: string;
+}
+
+export interface DomainContactInfo {
+    firstName: string;
+    lastName: string;
+    organization?: string;
+    email: string;
+    phone: string;
+    address1: string;
+    address2?: string;
+    city: string;
+    state: string;
+    postalCode: string;
+    country: string;
+}
+
+export interface DomainRegistrationInfo {
+    domain: string;
+    years: number;
+    nameservers?: string[];
+    privacyProtection?: boolean;
+    autoRenew?: boolean;
+    registrant: DomainContactInfo;
+    admin?: DomainContactInfo;
+    tech?: DomainContactInfo;
+    billing?: DomainContactInfo;
+}
+
+export interface DomainRegistrationResult {
+    success: boolean;
+    domain: string;
+    orderId?: string;
+    expiryDate?: Date;
+    message?: string;
+    details?: any;
+}
+
+export interface DomainInfo {
+    domain: string;
+    status: 'active' | 'expired' | 'pending' | 'suspended' | 'redemption' | 'pendingDelete';
+    registrationDate?: Date;
+    expiryDate?: Date;
+    nameservers?: string[];
+    locked?: boolean;
+    autoRenew?: boolean;
+    privacyProtection?: boolean;
+    contacts?: {
+        registrant?: DomainContactInfo;
+        admin?: DomainContactInfo;
+        tech?: DomainContactInfo;
+        billing?: DomainContactInfo;
+    };
+}
+
+// TLD pricing info for plugin to advertise supported TLDs
+export interface TldYearPricing {
+    years: number;      // 1-10
+    register: number;   // Registration price
+    renew: number;      // Renewal price
+    transfer: number;   // Transfer price (-1 = not supported)
+}
+
+export interface TldPricingInfo {
+    extension: string;           // e.g., ".com"
+    displayName?: string;        // e.g., "Commercial"
+    category?: string;           // e.g., "Popular", "Tech"
+    pricing: TldYearPricing[];   // Multi-year pricing
+    currency?: string;           // Currency code (e.g., "USD"). If not specified, assumes system base currency
+    minYears?: number;           // Default: 1
+    maxYears?: number;           // Default: 10
+    supportsPrivacy?: boolean;   // WHOIS privacy support
+    supportsTransfer?: boolean;  // Transfer support
+}
+
+export declare abstract class DomainRegistrarProvider {
+    name: string;
+    icon?: string;
+    constructor(lib: Context);
+    abstract config(): DomainRegistrarProviderConfig[] | Promise<DomainRegistrarProviderConfig[]>;
+    testConnection?(config: Record<string, any>): Promise<{ success: boolean; message: string; details?: any }>;
+    checkAvailability?(config: Record<string, any>, domain: string): Promise<DomainAvailabilityResult>;
+    checkBulkAvailability?(config: Record<string, any>, domains: string[]): Promise<DomainAvailabilityResult[]>;
+    registerDomain?(config: Record<string, any>, domainInfo: DomainRegistrationInfo): Promise<DomainRegistrationResult>;
+    renewDomain?(config: Record<string, any>, domain: string, years: number): Promise<{ success: boolean; expiryDate?: Date; message?: string }>;
+    transferDomain?(config: Record<string, any>, domain: string, authCode: string, years?: number): Promise<{ success: boolean; orderId?: string; message?: string }>;
+    getDomainInfo?(config: Record<string, any>, domain: string): Promise<DomainInfo>;
+    getNameservers?(config: Record<string, any>, domain: string): Promise<string[]>;
+    setNameservers?(config: Record<string, any>, domain: string, nameservers: string[]): Promise<{ success: boolean; message?: string }>;
+    getLockStatus?(config: Record<string, any>, domain: string): Promise<boolean>;
+    setLockStatus?(config: Record<string, any>, domain: string, locked: boolean): Promise<{ success: boolean; message?: string }>;
+    getAuthCode?(config: Record<string, any>, domain: string): Promise<{ success: boolean; authCode?: string; message?: string }>;
+    getContacts?(config: Record<string, any>, domain: string): Promise<DomainInfo['contacts']>;
+    updateContacts?(config: Record<string, any>, domain: string, contacts: DomainInfo['contacts']): Promise<{ success: boolean; message?: string }>;
+    getSupportedTlds?(config: Record<string, any>): Promise<TldPricingInfo[]>;
+}
