@@ -187,6 +187,37 @@ export interface TldPricingInfo {
     supportsTransfer?: boolean;  // Transfer support
 }
 
+export enum ECustomFieldType {
+    text = 'text',
+    link = 'link',
+    password = 'password',
+    dropdown = 'dropdown',
+    tickbox = 'tickbox',
+    textarea = 'textarea',
+    domain = 'domain'
+}
+
+export interface SelectOption {
+    key?: string;
+    value?: string;
+}
+
+export interface ICustomField {
+    name: string;
+    type: ECustomFieldType;
+    description: string;
+    validation: string;
+    displayOrder: number;
+    adminOnly: boolean;
+    requiredField: boolean;
+    showOnOrderForm: boolean;
+    showOnInvoice: boolean;
+    _id?: string;
+    value?: string;
+    selectOptions: SelectOption[];
+    identifier: string;
+}
+
 export declare abstract class DomainRegistrarProvider {
     name: string;
     icon?: string;
