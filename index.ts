@@ -55,10 +55,44 @@ export interface Models {
     navigation: any,
 }
 
+export interface InvoiceItemData {
+    name: string;
+    description: string;
+    quantity: number;
+    price: number;
+    type?: string;
+}
+
+export interface InvoiceToData {
+    name: string;
+    email: string;
+    address: string;
+    company?: string;
+    taxId?: string;
+}
+
+export interface CreateAdminInvoiceData {
+    userId: string;
+    number?: string;
+    date: string | Date;
+    dueDate: string | Date;
+    items: InvoiceItemData[];
+    invoiceTo?: InvoiceToData;
+    tax?: number;
+    status?: string;
+    notes?: string;
+}
+
+export interface InvoiceService {
+    createAdminInvoice(data: CreateAdminInvoiceData): Promise<any>;
+    addPayment(invoiceId: string, amount: number, gateway?: string, txnID?: string): Promise<any>;
+    [key: string]: any;
+}
+
 export declare abstract class PluginLib {
     abstract getOption(identifier: string): Promise<string | boolean | null | number>
     abstract setOption(identifier: string, value: string | boolean | number | null, ops: any): Promise<string | boolean | null | number>
-    invoiceService: any
+    invoiceService: InvoiceService
 }
 
 export interface Context {
@@ -194,12 +228,27 @@ export enum ECustomFieldType {
     dropdown = 'dropdown',
     tickbox = 'tickbox',
     textarea = 'textarea',
-    domain = 'domain'
+    domain = 'domain',
+    grouped_select = 'grouped_select'
 }
 
 export interface SelectOption {
     key?: string;
     value?: string;
+}
+
+export interface GroupedSelectOption {
+    key: string;
+    value: string;
+    icon?: string;
+}
+
+export interface GroupedSelectGroup {
+    key?: string;
+    name: string;
+    icon?: string;
+    order?: number;
+    options?: GroupedSelectOption[];
 }
 
 export interface ICustomField {
@@ -215,7 +264,34 @@ export interface ICustomField {
     _id?: string;
     value?: string;
     selectOptions: SelectOption[];
+    optionGroups?: GroupedSelectGroup[];
     identifier: string;
+}
+
+export interface AnalyticsEvent {
+    name: string
+    data?: Record<string, any>
+    timestamp?: string
+}
+
+export interface AnalyticsProviderConfig {
+    type: "text" | "number" | "password" | "checkbox" | "radio" | "select" | "textarea"
+    identifier: string
+    name: string
+    description?: string
+    default?: string | number | boolean
+    required?: boolean
+    validation?: string | ((value: any) => boolean)
+}
+
+export declare abstract class AnalyticsProvider {
+    name: string
+    icon?: string
+    constructor(lib: Context)
+    abstract config(): AnalyticsProviderConfig[] | Promise<AnalyticsProviderConfig[]>
+    abstract track(event: AnalyticsEvent): Promise<void> | void
+    pageView?(url: string, userData?: Record<string, any>): Promise<void> | void
+    isAvailable?(): Promise<boolean> | boolean
 }
 
 export declare abstract class DomainRegistrarProvider {
@@ -238,4 +314,116 @@ export declare abstract class DomainRegistrarProvider {
     getContacts?(config: Record<string, any>, domain: string): Promise<DomainInfo['contacts']>;
     updateContacts?(config: Record<string, any>, domain: string, contacts: DomainInfo['contacts']): Promise<{ success: boolean; message?: string }>;
     getSupportedTlds?(config: Record<string, any>): Promise<TldPricingInfo[]>;
+}
+// Plugin UI (Vue islands / legacy web components)
+export interface WebComponentConfig {
+    identifier: string;
+    name: string;
+    description?: string;
+    type: 'text' | 'password' | 'number' | 'boolean' | 'select' | 'textarea';
+    defaultValue?: any;
+    required?: boolean;
+    options?: Array<{ label: string; value: any }>;
+    validation?: string | ((value: any) => boolean);
+}
+
+export interface WebComponentDefinition {
+    name: string;
+    displayName: string;
+    description?: string;
+    icon?: string;
+    type: 'service-management' | 'dashboard' | 'account-info' | 'custom';
+    /** 'vue' = ESM Vue island; 'legacy' = vanilla JS (default) */
+    runtime?: 'vue' | 'legacy';
+    /** host = titled card from host; none = plugin owns outer chrome */
+    chrome?: 'host' | 'none';
+    context?: string[];
+    position?: 'top' | 'bottom' | 'sidebar' | 'main';
+    priority?: number;
+    entrypoint: string;
+    dependencies?: string[];
+    permissions?: string[];
+    config?: WebComponentConfig[];
+}
+
+/** Admin portal vs client portal for full plugin pages. */
+export type PluginPageArea = 'admin' | 'client';
+
+export interface PluginPageMenu {
+    label: string;
+    /** Match an existing sidebar section label (e.g. "System", "Billing"). Defaults to "Extensions". */
+    section?: string;
+    icon?: string;
+    order?: number;
+    /** Nest under another page's `name` from the same plugin. */
+    parent?: string;
+}
+
+/** Full navigable page contributed by a plugin (admin/client addon routes). */
+export interface PluginPageDefinition {
+    name: string;
+    displayName: string;
+    description?: string;
+    icon?: string;
+    area: PluginPageArea;
+    /** URL slug under /adminarea|clientarea/addon/<plugin>/… */
+    path: string;
+    /** 'vue' = ESM Vue island (default for pages); 'legacy' = vanilla JS */
+    runtime?: 'vue' | 'legacy';
+    /** host = titled card; none = plugin owns chrome (default none for pages) */
+    chrome?: 'host' | 'none';
+    entrypoint: string;
+    permissions?: string[];
+    menu?: PluginPageMenu;
+}
+
+export interface PluginMeta {
+    name: string;
+    version: string;
+    author: string;
+    description: string;
+    components?: Record<string, unknown>;
+    webComponents?: WebComponentDefinition[];
+    pages?: PluginPageDefinition[];
+}
+
+export interface PluginUiApi {
+    service: {
+        getId(): string;
+        getData(): any;
+        refresh(): Promise<void>;
+        performAction(action: string, params?: any): Promise<any>;
+    };
+    /** Present when the island is mounted as a full addon page (may be empty on service widgets). */
+    page?: {
+        getName(): string;
+        getPath(): string;
+        getParams(): Record<string, string>;
+        getQuery(): Record<string, string>;
+        getArea(): PluginPageArea;
+    };
+    ui: {
+        showToast(message: string, type?: 'success' | 'error' | 'warning' | 'info'): void;
+        showModal(content: string | HTMLElement, options?: any): Promise<any>;
+        showConfirm(message: string, title?: string): Promise<boolean>;
+        navigate(path: string): void;
+    };
+    http: {
+        get(url: string, options?: any): Promise<any>;
+        post(url: string, data?: any, options?: any): Promise<any>;
+        put(url: string, data?: any, options?: any): Promise<any>;
+        delete(url: string, options?: any): Promise<any>;
+    };
+    plugin: {
+        getId(): string;
+        getConfig(key?: string): Promise<any>;
+        setConfig(key: string, value: any): Promise<void>;
+        callBackend(method: string, params?: any, timeoutMs?: number): Promise<any>;
+    };
+    utils: {
+        formatCurrency(amount: number, currency?: string): string;
+        formatDate(date: string | Date, format?: string): string;
+        validateEmail(email: string): boolean;
+        generateId(): string;
+    };
 }
