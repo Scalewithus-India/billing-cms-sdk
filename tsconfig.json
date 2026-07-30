@@ -1,47 +1,19 @@
 {
   "compilerOptions": {
-    "target": "ES2023",
-    "module": "commonjs",
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
     "strict": true,
     "esModuleInterop": true,
-    "skipLibCheck": false,
+    "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
+    "declaration": true,
+    "rootDir": "./src",
+    "outDir": "./dist",
     "paths": {
-      "@/*": [
-        "./*"
-      ],
-      "@config": [
-        "./config"
-      ],
-      "@controllers/*": [
-        "./controllers/*"
-      ],
-      "@dtos/*": [
-        "./dtos/*"
-      ],
-      "@exceptions/*": [
-        "./exceptions/*"
-      ],
-      "@interfaces/*": [
-        "./interfaces/*"
-      ],
-      "@middlewares/*": [
-        "./middlewares/*"
-      ],
-      "@models/*": [
-        "./models/*"
-      ],
-      "@routes/*": [
-        "./routes/*"
-      ],
-      "@services/*": [
-        "./services/*"
-      ],
-      "@utils/*": [
-        "./utils/*"
-      ]
+      "billing-cms-sdk": ["./src/index.ts"],
+      "billing-cms-sdk/*": ["./src/*"]
     }
   },
+  "include": ["src/**/*"]
 }

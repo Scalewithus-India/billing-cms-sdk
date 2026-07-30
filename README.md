@@ -1,124 +1,138 @@
 # billing-cms-sdk
 
-Shared TypeScript contracts for Billing CMS plugins: payment gateways, backend providers, domain registrars, analytics, and UI contributions (`webComponents` + `pages`).
+Shared TypeScript contracts for Billing CMS **plugins** and **theme schema** (`0.1.0`).
+
+The host discovers plugins/themes from the filesystem and injects a real `Context` into providers, routes, and lifecycle hooks. This package does **not** run plugins — it defines what authors implement.
 
 ## Install
 
-From a plugin directory (local workspace or git dependency):
-
 ```bash
-bun add billing-cms-sdk
-# or
-npm install billing-cms-sdk
+# From a plugin directory (workspace)
+bun add billing-cms-sdk@file:../../billing-cms-sdk
 ```
 
 ```ts
 import {
-  PaymentGateway,
-  BackendProvider,
-  type PluginPageDefinition,
-  type WebComponentDefinition,
-  type PluginUiApi,
+  type PaymentGateway,
   type Context,
+  BasePluginRouteProvider,
+  LIFECYCLE_HOOKS,
+  type PluginUiApi,
+  type ThemeMeta,
 } from "billing-cms-sdk";
+
+// Subpaths
+import type { ThemeMeta } from "billing-cms-sdk/theme";
+import type { PluginUiApi } from "billing-cms-sdk/ui";
 ```
 
 ## Capability map
 
-| Capability | How the host discovers it | Primary export / file |
-|------------|---------------------------|------------------------|
-| Payment gateway | `payment-gateway.ts` | `PaymentGateway` |
-| Backend provider | `backend-provider.ts` | `BackendProvider` |
-| Domain registrar | `domain-registrar-provider.ts` | `DomainRegistrarProvider` |
-| Analytics | `analytics-provider.ts` | `AnalyticsProvider` |
-| API routes | `routes.ts` | `BasePluginRouteProvider` / route array |
-| Hooks | `hooks.ts` | named exports (`onInit`, `onActive`, `onDeactivate`, `before_*`, `after_*`) |
-| Email templates | `email-templates.ts` | template provider |
-| Embedded UI | `plugin.json` → `webComponents[]` | `WebComponentDefinition` |
+| Capability | How the host discovers it | SDK export / file |
+|------------|---------------------------|-------------------|
+| Payment gateway | `payment-gateway.ts` | `implements PaymentGateway` |
+| Backend provider | `backend-provider.ts` | `implements BackendProvider` |
+| Domain registrar | `domain-registrar-provider.ts` | `implements DomainRegistrarProvider` |
+| Analytics | `analytics-provider.ts` | `implements AnalyticsProvider` |
+| Email templates | `email-templates.ts` | `implements EmailTemplateProvider` |
+| API routes | `routes.ts` | `extends BasePluginRouteProvider` or route array |
+| Hooks | `hooks.ts` | `onPluginActivate` / `Init` / `Migrate` / `Deactivate` / `Uninstall` |
+| Embedded UI | `plugin.json` → `webComponents[]` | `WebComponentDefinition` (+ runtime `@billing-cms/plugin-ui`) |
 | Full pages | `plugin.json` → `pages[]` | `PluginPageDefinition` |
+| Theme schema | `theme.json` | `ThemeMeta`, `themeConfigOptionKey()` |
 
 `provides` in `plugin.json` is documentation-only. The host infers capabilities from files and arrays on disk.
 
-## UI: widgets vs pages
+## Context (lifecycle + providers + routes)
 
-**Widgets (`webComponents`)** — embedded on host screens (usually service detail) by `context` + `position`.
+Lifecycle hooks and providers receive a full `Context`:
 
-```json
-{
-  "webComponents": [
-    {
-      "name": "vps-management",
-      "displayName": "VPS Server Management",
-      "type": "service-management",
-      "runtime": "vue",
-      "chrome": "host",
-      "context": ["scalewithus-vps"],
-      "position": "main",
-      "entrypoint": "vps-management.mjs"
-    }
-  ]
+```ts
+import type { Context } from "billing-cms-sdk";
+
+export async function onPluginInit(context: Context) {
+  const configured = await context.lib.getOption("api_key");
+  context.lib.logger.info(`configured=${!!configured}`);
+  // Prefer services over raw model dumps:
+  // context.lib.invoiceService.addPayment(...)
+  // context.lib.email.queueEmail(userId, "template", { ... })
 }
 ```
 
-**Pages (`pages`)** — full navigable admin/client screens with optional sidebar menu items.
+| Surface | Purpose |
+|---------|---------|
+| `lib.getOption` / `setOption` | Namespaced as `plugin:<id>:<identifier>` |
+| `lib.invoiceService` | Invoice create / addPayment |
+| `lib.logger` | Host logger |
+| `lib.email.queueEmail` | Queue templated email |
+| `models.*` | Escape hatch (Mongoose models) — prefer `lib.*` for new code |
 
-```json
-{
-  "pages": [
-    {
-      "name": "plugin-info",
-      "displayName": "VPS Plugin Info",
-      "area": "admin",
-      "path": "info",
-      "runtime": "vue",
-      "chrome": "none",
-      "entrypoint": "plugin-info.mjs",
-      "menu": {
-        "label": "VPS plugin info",
-        "section": "Extensions",
-        "order": 10
-      }
-    }
-  ]
+There is **no** `paymentGatewayRegistry` — gateways load via `payment-gateway.ts`.
+
+## Routes
+
+```ts
+import { BasePluginRouteProvider, type PluginRoute } from "billing-cms-sdk";
+
+export default class MyRoutes extends BasePluginRouteProvider {
+  routes(): PluginRoute[] {
+    return [
+      {
+        path: "/status",
+        method: "get",
+        access: ["admin"],
+        handler: async (_req, res) => {
+          res.json(this.successResponse({ ok: true }));
+        },
+      },
+    ];
+  }
 }
 ```
 
-URLs:
+Mounted at `/api/v1/plugins/<plugin-id>/<path>`.
 
-- Admin: `/adminarea/addon/<plugin-id>/<path>`
-- Client: `/clientarea/addon/<plugin-id>/<path>`
+## Engines
 
-Reference example: [`plugins/scalewithus-vps`](../plugins/scalewithus-vps) → `/adminarea/addon/scalewithus-vps/info`.
-
-## `PluginUiApi` (island runtime)
-
-Injected as `pluginApi` into Vue islands (and exposed on `window.billingCMS.plugins[id]`).
-
-| Namespace | Service widgets | Addon pages |
-|-----------|-----------------|-------------|
-| `service.*` | Bound to the current service | Usually empty / no-op |
-| `page.*` | Absent | `getName`, `getPath`, `getParams`, `getQuery`, `getArea` |
-| `ui.*` | Toast, confirm, navigate | Same |
-| `http.*` | Calls `/api/v1/plugins/<id>/…` (relative) or absolute `/…` | Same |
-| `plugin.*` | Config + `callBackend` | Same |
-| `utils.*` | Formatting helpers | Same |
-
-```vue
-<script setup>
-import { inject } from 'vue'
-import { UButton } from '@billing-cms/plugin-ui'
-
-/** @type {import('billing-cms-sdk').PluginUiApi} */
-const api = inject('pluginApi')
-</script>
+```json
+{
+  "engines": {
+    "billing-cms-sdk": ">=0.1.0",
+    "billing-cms": ">=1.0.0"
+  }
+}
 ```
 
-Host UI kit: import from `@billing-cms/plugin-ui` (resolved at runtime via the host import map). Build SFCs with `plugins/_tooling/build-ui.mjs`.
+Host **warns** on mismatch at discovery; it does not hard-fail.
 
-## Further reading
+## Themes
 
-- [Plugin developer docs](../plugins/docs/README.md)
-- [UI pages](../plugins/docs/ui-pages.md)
-- [UI components](../plugins/docs/ui-components.md)
-- [Routes & hooks](../plugins/docs/routes-and-hooks.md)
-- [SDK usage in plugins](../plugins/docs/sdk.md)
+Themes are Nuxt SSR packages (`layouts/`, `partials/`, `pages/`). Type `theme.json` with:
+
+```ts
+import type { ThemeMeta } from "billing-cms-sdk/theme";
+import { themeConfigOptionKey } from "billing-cms-sdk/theme";
+
+const meta = { /* ... */ } satisfies ThemeMeta;
+// Host stores config under themeConfigOptionKey(themeId)
+```
+
+Theme resolution, nav IA, and SSR stay in the host — not this package.
+
+## UI islands
+
+Types live here (`PluginUiApi`, `WebComponentDefinition`). The Vue runtime helpers are **`@billing-cms/plugin-ui`** (host import map → `/_plugin_runtime/ui.mjs`). Build islands with `plugins/_tooling/build-ui.mjs`.
+
+## Package layout
+
+```
+src/
+  index.ts          # barrel
+  plugin/           # context, providers, routes, hooks, engines, meta
+  theme/            # ThemeMeta + option key helper
+  ui/               # islands + custom fields
+```
+
+## Version
+
+Current: **0.1.0** (modular package; Context on hooks; `BasePluginRouteProvider` in SDK).
